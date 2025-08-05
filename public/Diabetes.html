@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diabetes Diagnostics</title>
+  <link rel="stylesheet" href="diabetes.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/stethoscope.png" alt="logo" />
+      <span class="logo-text">MediScan</span>
+    </div>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <ul id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="heart.html">Heart </a></li>
+      <li><a href="diabetes.html">Diabetes </a></li>
+      <li><a href="parkinson.html">Parkinson</a></li>
+    </ul>
+  </nav>
+
+  <div class="form-container">
+    <h1>Diabetes Diagnostic Form</h1>
+    <form id="diabetesForm">
+      <label>Number of Pregnancies:
+        <input type="number" name="Pregnancies" required>
+      </label>
+
+      <label>Glucose Level:
+        <input type="number" name="Glucose" required>
+      </label>
+
+      <label>Blood Pressure (mm Hg):
+        <input type="number" name="BloodPressure" required>
+      </label>
+
+      <label>Skin Thickness (mm):
+        <input type="number" name="SkinThickness" required>
+      </label>
+
+      <label>Insulin Level:
+        <input type="number" name="Insulin" required>
+      </label>
+
+      <label>BMI:
+        <input type="number" step="0.1" name="BMI" required>
+      </label>
+
+      <label>Diabetes Pedigree Function:
+        <input type="number" step="0.01" name="DiabetesPedigreeFunction" required>
+      </label>
+
+      <label>Age:
+        <input type="number" name="Age" required>
+      </label>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <p id="result" style="text-align:center; margin-top: 1rem;"></p>
+  </div>
+
+  <script>
+ 
+    function toggleMenu() {
+      const nav = document.getElementById('nav-links');
+      nav.classList.toggle('show');
+    }
+
+    document.getElementById('diabetesForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = {};
+
+      formData.forEach((value, key) => {
+        data[key] = parseFloat(value);
+      });
+
+      try {
+        const response = await fetch('http://localhost:5000/predict-diabetes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        const resultElement = document.getElementById('result');
+    
+        if (result.prediction === 1) {
+          resultElement.innerText = ' Positive: Diabetes detected.';
+          resultElement.style.color = 'black'; 
+        } else if (result.prediction === 0) {
+          resultElement.innerText = 'Negative: No Diabetes detected.';
+          resultElement.style.color = 'black'; 
+        } else {
+          resultElement.innerText = 'Unable to determine prediction.';
+          resultElement.style.color = 'black'; 
+        }
+
+      } catch (err) {
+        const resultElement = document.getElementById('result');
+        resultElement.innerText = 'Error connecting to server.';
+        resultElement.style.color = 'black'; 
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>

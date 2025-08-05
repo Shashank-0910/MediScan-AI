@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parkinson's Disease Diagnostics</title>
+  <link rel="stylesheet" href="parkinson.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/stethoscope.png" alt="logo" />
+      <span class="logo-text">Medical Scan</span>
+    </div>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="heart.html">Heart</a></li>
+      <li><a href="diabetes.html">Diabetes</a></li>
+      <li><a href="parkinson.html">Parkinson</a></li>
+    </ul>
+    <button class="menu-toggle" onclick="document.getElementById('nav-links').classList.toggle('show');">&#9776;</button>
+  </nav>
+
+  <div class="form-container">
+    <h1>Parkinson's Disease Sample Form</h1>
+    <form id="parkinsonForm">
+      <label>MDVP: Fo (Hz): <input type="number" step="0.01" name="MDVP:Fo(Hz)" required></label>
+      <label>MDVP: Fhi (Hz): <input type="number" step="0.01" name="MDVP:Fhi(Hz)" required></label>
+      <label>MDVP: Flo (Hz): <input type="number" step="0.01" name="MDVP:Flo(Hz)" required></label>
+      <label>MDVP: Jitter (%): <input type="number" step="0.01" name="MDVP:Jitter(%)" required></label>
+      <label>MDVP: Jitter (Abs): <input type="number" step="0.01" name="MDVP:Jitter(Abs)" required></label>
+      <label>MDVP: RAP: <input type="number" step="0.01" name="MDVP:RAP" required></label>
+      <label>MDVP: PPQ: <input type="number" step="0.01" name="MDVP:PPQ" required></label>
+      <label>Jitter: DDP: <input type="number" step="0.01" name="Jitter:DDP" required></label>
+      <label>MDVP: Shimmer: <input type="number" step="0.01" name="MDVP:Shimmer" required></label>
+      <label>MDVP: Shimmer (dB): <input type="number" step="0.01" name="MDVP:Shimmer(dB)" required></label>
+      <label>Shimmer: APQ3: <input type="number" step="0.01" name="Shimmer:APQ3" required></label>
+      <label>Shimmer: APQ5: <input type="number" step="0.01" name="Shimmer:APQ5" required></label>
+      <label>MDVP: APQ: <input type="number" step="0.01" name="MDVP:APQ" required></label>
+      <label>Shimmer: DDA: <input type="number" step="0.01" name="Shimmer:DDA" required></label>
+      <label>NHR: <input type="number" step="0.01" name="NHR" required></label>
+      <label>HNR: <input type="number" step="0.01" name="HNR" required></label>
+      <label>RPDE: <input type="number" step="0.01" name="RPDE" required></label>
+      <label>DFA: <input type="number" step="0.01" name="DFA" required></label>
+      <label>Spread 1: <input type="number" step="0.01" name="Spread1" required></label>
+      <label>Spread 2: <input type="number" step="0.01" name="Spread2" required></label>
+      <label>D2: <input type="number" step="0.01" name="D2" required></label>
+      <label>PPE: <input type="number" step="0.01" name="PPE" required></label>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <p id="result" style=" text-align:center; margin-top: 1rem;"></p>
+  </div>
+
+  <script>
+    document.getElementById('parkinsonForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = {};
+
+    
+      formData.forEach((value, key) => {
+        data[key] = parseFloat(value); 
+      });
+
+      try {
+        const response = await fetch('http://localhost:5000/predict-parkinson', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data) 
+        });
+
+        const result = await response.json(); 
+
+        const resultElement = document.getElementById('result');
+        if (result.prediction === 1) {
+          resultElement.innerText = ' Positive: Parkinson detected.';
+          resultElement.style.color = 'black';
+        } else if (result.prediction === 0) {
+          resultElement.innerText = ' Negative: No Parkinson detected.';
+          resultElement.style.color = 'black'; 
+        } else {
+          resultElement.innerText = ' Unable to determine prediction.';
+          resultElement.style.color = 'black'; 
+        }
+
+      } catch (err) {
+        document.getElementById('result').innerText = ' Error connecting to server.';
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>
